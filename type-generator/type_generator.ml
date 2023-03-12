@@ -49,7 +49,7 @@ let generate_skeleton ~mode ~typ n =
     let param, typ =
       match typ with
       | `Func n when n > 0 -> gen_func ~mode @@ get_fun_param_num (), `Func (n-1)
-      | `Norm | _ -> gen_base ~mode (), typ in
+      | `Norm | _ -> gen_base ~mode ~lists:(n <> 1) (), typ in
     let ret =
       if n > 1 then
         generate ~typ (n-1)

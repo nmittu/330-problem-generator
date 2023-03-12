@@ -9,31 +9,66 @@ module Model = struct
     ; code_input: string
     ; compile_result: string
     ; error: string
-    ; mode_config: Type_generator.mode
-    ; typ_config: Type_generator.typ
+    ; mode_config: [ `Non_polymorphic | `Polymorphic ]
+    ; poly_count: int
+    ; typ_config: [`Norm | `Func ]
+    ; func_count: int
     ; params: int
     }
-  [@@deriving sexp, fields, compare]
+      [@@deriving sexp, fields, compare]
 
-  let init ?(mode=`Polymorphic 3) ?(typ=`Func 1) ?(params=4) () =
-    { typ = Type_generator.generate ~mode ~typ params |> Type_generator.to_string
+  let mode t =
+    if Poly.(`Polymorphic = t.mode_config) then
+      `Polymorphic t.poly_count
+    else `Non_polymorphic
+
+  let typ_t t =
+    if Poly.(`Func = t.typ_config) then
+      `Func t.func_count
+    else `Norm
+  
+  let init () =
+    { typ = Type_generator.generate ~mode:(`Polymorphic 3) ~typ:(`Func 1) 4 |> Type_generator.to_string
     ; code_input = ""
     ; compile_result = ""
     ; error = ""
-    ; mode_config = mode
-    ; typ_config = typ
-    ; params = params
+    ; mode_config = `Polymorphic
+    ; poly_count = 3
+    ; typ_config = `Func
+    ; func_count = 1
+    ; params = 4
+    }
+
+  let validate_conf t =
+    let poly_count = min t.poly_count t.params |> max 1 in
+    let func_count = min t.func_count (t.params - 1) |> max 1 in
+    let params = max t.params 2 in
+    { t with poly_count; func_count; params }
+  
+  let next t =
+    let t = validate_conf t in
+    { t with
+      typ = Type_generator.generate ~mode:(mode t) ~typ:(typ_t t) t.params |> Type_generator.to_string
+    ; code_input = ""
+    ; compile_result = ""
+    ; error = ""
     }
 
   let update_mode t mode =
-    init ~mode ~typ:t.typ_config ~params:t.params ()
+    let t = match mode with
+      | `Polymorphic n -> { t with mode_config=`Polymorphic; poly_count=n }
+      | `Non_polymorphic -> { t with mode_config=`Non_polymorphic }
+    in next t
   
   let update_typ t typ =
-    init ~mode:t.mode_config ~typ ~params:t.params ()
+    let t = match typ with
+      | `Func n -> { t with typ_config=`Func; func_count=n }
+      | `Norm -> { t with typ_config=`Norm }
+    in next t
   
   let update_params t params =
-    init ~mode:t.mode_config ~typ:t.typ_config ~params ()
-
+    next { t with params }
+    
   let type_regex = Str.regexp {|[a-zA-Z- ]* : \(.*\) = .*|}
   
   let compile t =
@@ -77,9 +112,7 @@ let apply_action model action _ ~schedule_action:_ =
   | Update_mode m -> Model.update_mode model m
   | Update_typ t -> Model.update_typ model t
   | Update_params p -> Model.update_params model p
-  | Next ->
-     Printf.printf "%s" (model |> Model.sexp_of_t |> Sexp.to_string);
-     Model.init ~mode:(Model.mode_config model) ~typ:(Model.typ_config model) ~params:(Model.params model) ()
+  | Next -> Model.next model
 ;;
 
 let on_startup ~schedule_action:_ _ = Async_kernel.return ()
@@ -149,7 +182,9 @@ let view (m : Model.t Incr.t) ~inject =
   and configs =
     let%map mode = m >>| Model.mode_config
     and typ = m >>| Model.typ_config
-    and _params = m >>| Model.params in
+    and params = m >>| Model.params
+    and func_count = m >>| Model.func_count
+    and poly_count = m >>| Model.poly_count in
 
     let get_int_val_by_id id =
       let open Option.Let_syntax in
@@ -172,26 +207,25 @@ let view (m : Model.t Incr.t) ~inject =
            ~f:(fun n -> inject (Action.Update_typ (`Func n))))
     in
 
-    let non_poly = match mode with
-      | `Non_polymorphic -> true
-      | _ -> false in
-
-    let typ = match typ with
-      | `Func _ -> `Func
-      | `Norm -> `Norm
+    let div_css =
+      let (@>) = Css_gen.(@>) in
+      Css_gen.display `Inline_block
+      @> Css_gen.padding_right (`Em 2)
     in
-    
+
     let mode_conf =
       Node.div
-        ~attr:(Attr.many_without_merge [Attr.style (Css_gen.display `Inline_block)])
-        [ Node.input
+        ~attr:(Attr.many_without_merge [Attr.style div_css])
+        [ Node.text "Parameter Type:"
+        ; Node.br ()
+        ; Node.input
             ~attr:
             (Attr.many_without_merge
                [ Attr.type_ "radio"
                ; Attr.name "mode"
                ; Attr.id "non_poly"
                ; Attr.value "0"
-               ; Attr.bool_property "checked" non_poly
+               ; Attr.bool_property "checked" Poly.(mode = `Non_polymorphic)
                ; Attr.on_click (fun _ -> inject (Action.Update_mode `Non_polymorphic))])
             []
         ; Node.label
@@ -204,22 +238,23 @@ let view (m : Model.t Incr.t) ~inject =
                [ Attr.type_ "radio"
                ; Attr.name "mode"
                ; Attr.id "poly"
-               ; Attr.value "1"
-               ; Attr.bool_property "checked" (not non_poly)
+               ; Attr.bool_property "checked" Poly.(mode = `Polymorphic)
                ; Attr.on_click poly_on_click])
             []
         ; Node.label
             ~attr:
             (Attr.many_without_merge [Attr.for_ "poly"])
-            [ Node.text "Polymorphic"
+            [ Node.text "Polymorphic (number of vars) "
             ; Node.input
                 ~attr:
                 (Attr.many_without_merge
                    [ Attr.type_ "number"
                    ; Attr.id "poly_count"
-                   ; Attr.value "4"
-                   ; Attr.min 1.0
-                   ; Attr.on_input (fun e _ -> poly_on_click e)])
+                   ; Attr.min 1.
+                   ; Attr.max (Int.to_float params)
+                   ; Attr.string_property "value" (Int.to_string poly_count)
+                   ; Attr.on_input (fun e _ -> poly_on_click e)
+                   ; Attr.on_keydown (fun _ -> Effect.Prevent_default)])
                 []]
               
         ]
@@ -227,8 +262,10 @@ let view (m : Model.t Incr.t) ~inject =
 
     let typ_conf =
       Node.div
-        ~attr:(Attr.many_without_merge [Attr.style (Css_gen.display `Inline_block)])
-        [ Node.input
+        ~attr:(Attr.many_without_merge [Attr.style div_css])
+        [ Node.text "Higher order function config:"
+        ; Node.br ()
+        ; Node.input
             ~attr:
             (Attr.many_without_merge
                [ Attr.type_ "radio"
@@ -256,15 +293,17 @@ let view (m : Model.t Incr.t) ~inject =
             []
         ; Node.label
             ~attr: (Attr.many_without_merge [Attr.for_ "func"])
-            [ Node.text "HOF"
+            [ Node.text "HOF (number of functions) "
             ;  Node.input
                  ~attr:
                  (Attr.many_without_merge
                     [ Attr.id "func_count"
                     ; Attr.type_ "number"
                     ; Attr.min 1.
-                    ; Attr.value "1"
+                    ; Attr.max (Int.to_float (params-1))
+                    ; Attr.string_property "value" (Int.to_string func_count)
                     ; Attr.on_input (fun e _ -> func_on_clic e)
+                    ; Attr.on_keydown (fun _ -> Effect.Prevent_default)
                  ])
                  []
             ]
@@ -273,15 +312,16 @@ let view (m : Model.t Incr.t) ~inject =
     in
     let params_conf =
       Node.span
-        ~attr:(Attr.many_without_merge [Attr.style (Css_gen.display `Inline_block)])
-        [ Node.text "Params"
+        ~attr:(Attr.many_without_merge [Attr.style div_css])
+        [ Node.text "Number of params "
         ; Node.input
             ~attr:
             (Attr.many_without_merge
                [ Attr.type_ "number"
-               ; Attr.min 1.
-               ; Attr.value "4"
+               ; Attr.min 2.
+               ; Attr.string_property "value" (Int.to_string params)
                ; Attr.on_input (fun _ i -> inject (Action.Update_params (Int.of_string i)))
+               ; Attr.on_keydown (fun _ -> Effect.Prevent_default)
                ])
             []
         ]
