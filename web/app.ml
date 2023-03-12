@@ -114,6 +114,7 @@ let view (m : Model.t Incr.t) ~inject =
       Css_gen.width (`Percent (Percent.of_percentage 100.))
       @> Css_gen.resize `None
     in
+    let module FocusHook = Attr.Single_focus_hook() in
     Node.textarea
       ~attr:
       (Attr.many_without_merge
@@ -122,6 +123,7 @@ let view (m : Model.t Incr.t) ~inject =
          ; Attr.string_property "value" code
          ; Attr.string_property "id" "code_input"
          ; Attr.string_property "rows" "1"
+         ; FocusHook.attr `Read_the_docs__this_hook_is_unpredictable ~after:Ui_effect.Ignore
          ; Attr.style css
          ; Attr.on_input
              (fun _ text ->
@@ -321,7 +323,8 @@ let view (m : Model.t Incr.t) ~inject =
     in Node.div [mode_conf; typ_conf; params_conf]
     
   in
-  Node.body [type_node; code_input; compiler_res_node; error_node; next_button; configs]
+  Node.body
+    [type_node; code_input; compiler_res_node; error_node; next_button; configs]
 ;;
 
 let on_display ~old_model model _ ~schedule_action: _ =
