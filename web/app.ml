@@ -48,9 +48,9 @@ module Model = struct
     | Error error -> {t with compile_result = ""; error }
 
   let update_input t code_input =
-    let model = { t with code_input=String.strip code_input; compile_result = ""; error = ""} in
+    let model = { t with code_input=code_input; compile_result = ""; error = ""} in
     if String.is_suffix ~suffix:";;\n" code_input then
-      compile model
+      compile { model with code_input=String.strip code_input }
     else
       model
 
