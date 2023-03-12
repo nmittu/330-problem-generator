@@ -8,8 +8,6 @@
   js_of_ocaml-compiler
   js_of_ocaml-toplevel)
  (modes js)
- (link_flags
-  (:standard -linkall))
  (js_of_ocaml
   (flags
    (:standard --toplevel --enable=effects))
