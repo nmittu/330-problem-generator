@@ -1,7 +1,6 @@
 open! Core
 open! Incr_dom
 open! Js_of_ocaml
-
 module App = Problems_web.App
 
 let () =

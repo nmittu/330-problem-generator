@@ -1,11 +1,18 @@
 (executable
  (name main)
- (libraries type_generator core incr_dom problems_web js_of_ocaml-compiler js_of_ocaml-toplevel)
+ (libraries
+  type_generator
+  core
+  incr_dom
+  problems_web
+  js_of_ocaml-compiler
+  js_of_ocaml-toplevel)
  (modes js)
  (link_flags
   (:standard -linkall))
  (js_of_ocaml
-  (flags (:standard --toplevel --enable=effects))
+  (flags
+   (:standard --toplevel --enable=effects))
   (build_runtime_flags
    (:standard +toplevel.js)))
  (preprocess
