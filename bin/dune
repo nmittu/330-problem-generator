@@ -1,12 +1,12 @@
 (executable
  (name main)
- (libraries type_generator core incr_dom problems_web js_of_ocaml-compiler js_of_ocaml-toplevel dynlink)
+ (libraries type_generator core incr_dom problems_web js_of_ocaml-compiler js_of_ocaml-toplevel)
  (modes js)
  (link_flags
   (:standard -linkall))
  (js_of_ocaml
-  (flags (:standard --toplevel --dynlink --enable=effects))
+  (flags (:standard --toplevel --enable=effects))
   (build_runtime_flags
-  (:standard +toplevel.js +dynlink.js)))
+  (:standard +toplevel.js)))
  (preprocess
   (pps js_of_ocaml-ppx ppx_jane)))
