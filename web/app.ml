@@ -138,14 +138,14 @@ let view (m : Model.t Incr.t) ~inject =
       ~attr:
       (Attr.many_without_merge
        [Attr.style (Css_gen.color (`Name "green"))])
-      [ Node.text compiler_res]
+      [ Node.pre [Node.text compiler_res]]
   and error_node =
     let%map error = m >>| Model.error in
     Node.div
       ~attr:
       (Attr.many_without_merge
          [ Attr.style (Css_gen.color (`Name "red"))])
-      [ Node.text error ]
+      [ Node.pre [Node.text error] ]
   and configs =
     let%map mode = m >>| Model.mode_config
     and typ = m >>| Model.typ_config
