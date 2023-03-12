@@ -1,0 +1,30 @@
+name: dune build
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - edited
+      - synchronize
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  format:
+    name: dune build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: Setup dune
+        uses: nmittu/setup-dune@v2
+        with:
+          packages: "js_of_ocaml js_of_ocaml-toplevel js_of_ocaml-ppx incr_dom"
+          compiler: 5.0.0
+      - name: Build
+        run: |
+          eval $(opam config env)
+          dune build bin/{index.html,main.bc.js}
