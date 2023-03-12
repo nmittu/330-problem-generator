@@ -14,7 +14,9 @@ type ocaml_type =
   | Polymorphic of string
 
 type mode = [`Non_polymorphic | `Polymorphic of int]
+              [@@deriving sexp, compare]
 type typ = [ `Func of int | `List of int | `Norm]
+             [@@deriving sexp, compare]
 
 let rec gen_base ?(tuples=true) ~mode () =
   if tuples && Random.int 10 = 0 then

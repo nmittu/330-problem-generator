@@ -1,3 +1,5 @@
 (library
  (name type_generator)
- (libraries core))
+ (libraries core)
+ (preprocess
+  (pps js_of_ocaml-ppx ppx_jane)))
