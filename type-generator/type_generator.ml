@@ -15,12 +15,15 @@ type ocaml_type =
 
 type mode = [`Non_polymorphic | `Polymorphic of int]
               [@@deriving sexp, compare]
-type typ = [ `Func of int | `List of int | `Norm]
+type typ = [ `Func of int | `Norm]
              [@@deriving sexp, compare]
 
-let rec gen_base ?(tuples=true) ~mode () =
-  if tuples && Random.int 10 = 0 then
+let rec gen_base ?(tuples=true) ?(lists=true) ~mode () =
+  let rand = Random.int 10 in
+  if tuples && rand = 0 then
     Tuple(gen_base ~mode ~tuples:false (), gen_base ~mode ~tuples:false ())
+  else if lists && rand = 1 then
+    List(gen_base ~mode ~tuples:false ~lists:false ())
   else
     match mode with
     | `Non_polymorphic -> (
@@ -30,9 +33,6 @@ let rec gen_base ?(tuples=true) ~mode () =
       | 2 -> String
       | _ -> Bool)
     | `Polymorphic -> Polymorphic "UNK"
-
-let gen_list ~mode =
-  List (gen_base ~mode ())
 
 let rec gen_func ~mode n =
   let ret =
@@ -49,7 +49,6 @@ let generate_skeleton ~mode ~typ n =
     let param, typ =
       match typ with
       | `Func n when n > 0 -> gen_func ~mode @@ get_fun_param_num (), `Func (n-1)
-      | `List n when n > 0 -> gen_list ~mode, `List (n-1)
       | `Norm | _ -> gen_base ~mode (), typ in
     let ret =
       if n > 1 then

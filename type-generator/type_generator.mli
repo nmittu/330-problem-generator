@@ -10,7 +10,7 @@ type ocaml_type =
 
 type mode = [`Non_polymorphic | `Polymorphic of int]
               [@@deriving sexp, compare]
-type typ = [`Func of int | `List of int | `Norm]
+type typ = [`Func of int | `Norm]
              [@@deriving sexp, compare]
 
 val generate : mode:mode -> typ:typ -> int -> ocaml_type

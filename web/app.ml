@@ -172,20 +172,12 @@ let view (m : Model.t Incr.t) ~inject =
            ~f:(fun n -> inject (Action.Update_typ (`Func n))))
     in
 
-    let list_on_clic _ =
-      Option.value
-        ~default: (Ui_effect.return ())
-        (Option.map (get_int_val_by_id "list_count")
-           ~f:(fun n -> inject (Action.Update_typ (`List n))))
-    in
-
     let non_poly = match mode with
       | `Non_polymorphic -> true
       | _ -> false in
 
     let typ = match typ with
       | `Func _ -> `Func
-      | `List _ -> `List
       | `Norm -> `Norm
     in
     
@@ -273,32 +265,6 @@ let view (m : Model.t Incr.t) ~inject =
                     ; Attr.min 1.
                     ; Attr.value "1"
                     ; Attr.on_input (fun e _ -> func_on_clic e)
-                 ])
-                 []
-            ]
-        ; Node.br ()
-          ; Node.input
-            ~attr:
-            (Attr.many_without_merge
-               [ Attr.type_ "radio"
-               ; Attr.name "typ"
-               ; Attr.id "list"
-               ; Attr.value "1"
-               ; Attr.bool_property "checked" (Poly.(typ = `List))
-               ; Attr.on_click list_on_clic
-               ])
-            []
-        ; Node.label
-            ~attr: (Attr.many_without_merge [Attr.for_ "list"])
-            [ Node.text "Lists"
-            ;  Node.input
-                 ~attr:
-                 (Attr.many_without_merge
-                    [ Attr.id "list_count"
-                    ; Attr.type_ "number"
-                    ; Attr.min 1.
-                    ; Attr.value "1"
-                    ; Attr.on_input (fun e _ -> list_on_clic e)
                  ])
                  []
             ]
