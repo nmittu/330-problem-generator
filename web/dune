@@ -1,0 +1,5 @@
+(library
+ (name problems_web)
+ (libraries core incr_dom type_generator str js_of_ocaml-compiler js_of_ocaml-toplevel)
+ (preprocess
+   (pps js_of_ocaml-ppx ppx_jane)))

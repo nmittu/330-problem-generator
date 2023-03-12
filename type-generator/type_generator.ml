@@ -1,6 +1,7 @@
 open! Core
 
 module StringSet = Set.Make(String)
+module StringMap = Hashtbl.Make(String)
 
 type ocaml_type =
   | Int
@@ -123,12 +124,36 @@ let rec list_pass ~alphabet t =
   | List t -> List (fill_in ~alphabet t |> fst)
   | _ -> t
 
+let normalize t =
+  let mapping = StringMap.create () in
+  let next = ref 'a' in
+  let rec normalize t =
+    match t with
+    | Int | Float | String | Bool -> t
+    | Tuple(l, r) ->
+       let l = normalize l in
+       let r = normalize r in
+       Tuple(l, r)
+    | List t -> List (normalize t)
+    | Func(l, r) ->
+       let l = normalize l in
+       let r = normalize r in
+       Func(l, r)
+    | Polymorphic a ->
+       match StringMap.find mapping a with
+       | Some a -> Polymorphic a
+       | None ->
+          StringMap.add ~key:a ~data:(Char.to_string !next) mapping |> ignore;
+          let a = !next in
+          next := Char.of_int_exn (Char.to_int !next + 1);
+          Polymorphic (Char.to_string a)
+  in normalize t
+
 let gen_poly ~alphabet ~typ n =
   let skeleton = generate_skeleton ~mode:`Polymorphic ~typ n in
   let t, in_use = poly_pass ~alphabet skeleton in
   let t, _ = func_pass ~alphabet ~in_use t in
-  list_pass ~alphabet t
-
+  list_pass ~alphabet t |> normalize
 
 let rec to_string t =
   match t with
@@ -139,7 +164,7 @@ let rec to_string t =
   | Tuple(l, r) ->
      let l = to_string l in
      let r = to_string r in
-     Printf.sprintf "(%s * %s)" l r
+     Printf.sprintf "%s * %s" l r
   | List t ->
      let s = to_string t in
      Printf.sprintf "%s list" s
