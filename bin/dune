@@ -7,6 +7,11 @@
  (js_of_ocaml
   (flags (:standard --toplevel --enable=effects))
   (build_runtime_flags
-  (:standard +toplevel.js)))
+   (:standard +toplevel.js)))
  (preprocess
   (pps js_of_ocaml-ppx ppx_jane)))
+
+(env
+ (dev
+  (js_of_ocaml
+   (compilation_mode whole_program))))
