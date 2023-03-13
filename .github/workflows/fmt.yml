@@ -1,4 +1,4 @@
-name: dune build @fmt
+name: dune fmt
 on:
   pull_request:
     types:
