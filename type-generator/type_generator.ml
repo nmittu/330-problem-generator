@@ -90,8 +90,8 @@ let rec fill_in ~alphabet t =
     let using = StringSet.union using usingr in
     Tuple (l, r), using
   | List t ->
-    let t, using = fill_in ~alphabet t in
-    List t, using
+    let t, _ = fill_in ~alphabet t in
+    List t, StringSet.empty
   | Func (_, _) -> t, StringSet.empty (* Shouldn't have funcs nested twice deep *)
   | Polymorphic "UNK" ->
     let alpha = alphabet |> StringSet.elements in
