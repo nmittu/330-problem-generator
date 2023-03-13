@@ -78,10 +78,14 @@ module Model = struct
 
   let update_params t params = next { t with params }
   let type_regex = Str.regexp {|[a-zA-Z- ]* : \(.*\) = .*|}
+  let remove_excess_whitespace = Str.regexp "[ \n]+"
 
   let compile t =
     match Compiler.execute (String.strip t.code_input) with
     | Ok compile_result ->
+      let compile_result =
+        Str.global_replace remove_excess_whitespace " " compile_result
+      in
       if Str.string_match type_regex compile_result 0
       then (
         let type_ = Str.matched_group 1 compile_result in
