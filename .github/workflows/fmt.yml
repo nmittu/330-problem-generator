@@ -27,4 +27,4 @@ jobs:
       - name: Run fmt
         run: |
           eval $(opam config env)
-          dune build fmt
+          dune fmt
