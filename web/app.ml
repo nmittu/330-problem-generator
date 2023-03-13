@@ -172,6 +172,16 @@ let view (m : Model.t Incr.t) ~inject =
                `Read_the_docs__this_hook_is_unpredictable
                ~after:Ui_effect.Ignore
            ; Attr.style css
+           ; Attr.on_keydown (fun e ->
+               if e##.keyCode = 09
+               then (
+                 let target =
+                   Js.Opt.bind e##.target Js_of_ocaml.Dom_html.CoerceTo.textarea
+                   |> Js.Opt.to_option
+                 in
+                 Option.map target ~f:(fun target -> Indent.textarea target) |> ignore;
+                 Effect.Prevent_default)
+               else Ui_effect.return ())
            ; Attr.on_input (fun _ text ->
                Ui_effect.Many
                  [ inject (Action.Update_input text)

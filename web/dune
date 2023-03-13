@@ -6,6 +6,7 @@
   type_generator
   str
   js_of_ocaml-compiler
-  js_of_ocaml-toplevel)
+  js_of_ocaml-toplevel
+  ocp-indent.lib)
  (preprocess
   (pps js_of_ocaml-ppx ppx_jane)))
