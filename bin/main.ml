@@ -1,7 +1,7 @@
 open! Core
 open! Incr_dom
 open! Js_of_ocaml
-module App = Problems_web.App
+module App = Problems_web.App.Make (Problems_web.Type_of_expr_controller)
 
 let () =
   Start_app.start
