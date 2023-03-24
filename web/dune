@@ -4,6 +4,7 @@
   core
   incr_dom
   type_generator
+  expr_generator
   str
   js_of_ocaml-compiler
   js_of_ocaml-toplevel
