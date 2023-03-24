@@ -1,5 +1,5 @@
-(executable
- (name main)
+(executables
+ (names expr_of_type type_of_expr)
  (libraries
   type_generator
   core

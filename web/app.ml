@@ -189,7 +189,7 @@ module Make (Controller : Controller_intf.S) = struct
     in
     let%map problem_node =
       let%map problem = m >>| Model.controller >>| Controller.problem in
-      Node.div [ Node.text problem ]
+      Node.pre [ Node.text problem ]
     and code_input =
       let%map code = m >>| Model.input
       and controller = m >>| Model.controller in
