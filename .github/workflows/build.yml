@@ -22,9 +22,9 @@ jobs:
       - name: Setup dune
         uses: nmittu/setup-dune@v2
         with:
-          packages: "js_of_ocaml js_of_ocaml-toplevel js_of_ocaml-ppx incr_dom ocp-indent"
+          packages: "js_of_ocaml js_of_ocaml-toplevel js_of_ocaml-ppx incr_dom ocp-indent ocamlformat-lib"
           compiler: 5.0.0
       - name: Build
         run: |
           eval $(opam config env)
-          dune build bin/{index.html,main.bc.js}
+          dune build bin/{index.html,type_of_expr.html,type_of_expr.bc.js,expr_of_type.html,expr_of_type.bc.js}
