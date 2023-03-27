@@ -22,7 +22,7 @@ let bool_p = Str.regexp {|bool|}
 let list_p = Str.regexp {|list|}
 let star_p = Str.regexp {|\*|}
 let arrow_p = Str.regexp {|->|}
-let poly_p = Str.regexp {|'\([a-z]+\)|}
+let poly_p = Str.regexp {|'[a-z]+|}
 let lparen_p = Str.regexp {|(|}
 let rparen_p = Str.regexp {|)|}
 let whitespace_p = Str.regexp {|[\n\r\t ]+|}
@@ -68,9 +68,10 @@ let tokenize str =
       ArrowT :: toks)
     else if Str.string_match poly_p str pos
     then (
-      let match_len = Str.matched_string str |> String.length in
+      let matched_str = Str.matched_string str in
+      let match_len = matched_str |> String.length in
       let%map toks = tokenize (pos + match_len) in
-      let name = Str.matched_group 1 str in
+      let name = String.sub matched_str ~pos:1 ~len:(match_len - 1) in
       PolyT name :: toks)
     else if Str.string_match lparen_p str pos
     then (
@@ -147,11 +148,15 @@ and parse_tuple toks =
 
 and parse_list toks =
   let%bind toks, typ = parse_base toks in
-  match%bind lookahead toks with
-  | ListT ->
-    let%bind toks = match_tok toks ListT in
-    return (toks, List typ)
-  | _ -> return (toks, typ)
+  let rec consume_lists t toks =
+    match%bind lookahead toks with
+    | ListT ->
+      let%bind toks = match_tok toks ListT in
+      let%bind toks, t = consume_lists (List t) toks in
+      return (toks, t)
+    | _ -> return (toks, t)
+  in
+  consume_lists typ toks
 
 and parse_base toks =
   match%bind lookahead toks with
