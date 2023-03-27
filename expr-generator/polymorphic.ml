@@ -22,14 +22,34 @@ let rec generate depth =
     | 0 ->
       let len = Random.int 3 in
       List (List.init len ~f:(fun _ -> generate (depth - 1)))
-    | 1 -> Cons (generate (depth - 1), generate (depth - 1))
+    | 1 -> Cons (generate (depth - 1), generate_list (depth - 1))
     | 2 ->
       let len = Random.int 2 + 1 in
       Tuple (List.init len ~f:(fun _ -> generate (depth - 1)))
     | 3 ->
       let len = Random.int 2 + 1 in
       App (Var, List.init len ~f:(fun _ -> generate (depth - 1)))
-    | _ -> If (generate_bool (depth - 1), generate (depth - 1), generate (depth - 1)))
+    | _ -> If (generate_func (depth - 1), generate (depth - 1), generate (depth - 1)))
+
+and generate_list depth =
+  if depth = 0
+  then Var
+  else (
+    match Random.int 4 with
+    | 0 -> Var
+    | 1 -> Cons (generate (depth - 1), generate_list (depth - 1))
+    | 2 ->
+      let len = Random.int 3 in
+      List (List.init len ~f:(fun _ -> generate (depth - 1)))
+    | _ -> If (generate_bool (depth - 1), generate_list 0, generate_list 0))
+
+and generate_func depth =
+  if depth = 0
+  then Var
+  else (
+    match Random.int 5 with
+    | 0 -> If (generate_bool (depth - 1), generate_func 0, generate_func 0)
+    | _ -> Var)
 
 and generate_bool depth =
   if depth = 0
