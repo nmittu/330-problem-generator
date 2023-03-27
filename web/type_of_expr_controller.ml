@@ -6,29 +6,31 @@ open Expr_generator
 type t =
   { expr : string
   ; depth : int
+  ; mode : [ `Polymorphic | `Non_polymorphic ]
   }
 [@@deriving sexp, compare]
 
-type settings_action = Update_depth of int [@@deriving sexp]
+type settings_action =
+  | Update_depth of int
+  | Update_mode of [ `Polymorphic | `Non_polymorphic ]
+[@@deriving sexp]
 
-let generate_expr depth =
-  let open NonPolymorphic in
-  let g t = generate t depth |> to_string in
-  match Random.int 5 with
-  | 0 -> g int
-  | 1 -> g float
-  | 2 -> g string
-  | 3 -> g bool
-  | _ ->
-    (match Random.int 4 with
-     | 0 -> g (list int)
-     | 1 -> g (list float)
-     | 2 -> g (list string)
-     | _ -> g (list bool))
+let get_module m : (module Generator) =
+  match m with
+  | `Polymorphic -> (module Polymorphic)
+  | `Non_polymorphic -> (module Non_polymorphic)
 ;;
 
-let init () = { expr = generate_expr 3; depth = 3 }
-let next t = { t with expr = generate_expr t.depth }
+let generate_expr m depth =
+  let open (val get_module m) in
+  gen_string depth
+;;
+
+let init () =
+  { expr = generate_expr `Non_polymorphic 2; depth = 2; mode = `Non_polymorphic }
+;;
+
+let next t = { t with expr = generate_expr t.mode t.depth }
 let problem t = t.expr
 let should_submit _ = String.is_suffix ~suffix:"\n"
 let type_regex = Str.regexp {|[a-zA-Z- ]* : \(.*\) = .*|}
@@ -42,11 +44,7 @@ let submit t input =
     let expected = Str.global_replace remove_excess_whitespace " " expected in
     if Str.string_match type_regex expected 0
     then (
-      let typ =
-        Str.matched_group 1 expected
-        |> String.chop_prefix_if_exists ~prefix:"type t ="
-        |> String.strip
-      in
+      let typ = Str.matched_group 1 expected |> String.strip in
       return (Type_generator.Parser.parse typ))
     else Error ("Invalid problem, please let course staff know.\nerror: " ^ expected)
   in
@@ -63,12 +61,31 @@ let submit t input =
 let on_tab _ _ = ()
 
 let settings t =
-  [ Int
+  [ Group
+      { name = "Parameter Type"
+      ; settings =
+          [ Bool
+              { name = "Non Polymorphic"
+              ; enabled = Some Poly.(t.mode = `Non_polymorphic)
+              ; value = ()
+              ; update = (fun () -> Update_mode `Non_polymorphic)
+              ; extra = ()
+              }
+          ; Bool
+              { name = "Polymorphic"
+              ; enabled = Some Poly.(t.mode = `Polymorphic)
+              ; value = ()
+              ; update = (fun () -> Update_mode `Polymorphic)
+              ; extra = ()
+              }
+          ]
+      }
+  ; Int
       { name = "Expression depth "
       ; enabled = None
       ; value = t.depth
       ; update = (fun d -> Update_depth d)
-      ; extra = 2, 10
+      ; extra = 2, 5
       }
   ]
 ;;
@@ -76,4 +93,5 @@ let settings t =
 let update_settings t action =
   match action with
   | Update_depth depth -> next { t with depth }
+  | Update_mode mode -> next { t with mode }
 ;;
