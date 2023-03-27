@@ -115,10 +115,8 @@ let tok_to_s = function
 let match_tok toks t =
   match toks with
   | h :: tl when Poly.(h = t) -> Ok tl
-  | h :: _ ->
-    Error (Printf.sprintf "Expected %s but got %s" (tok_to_s t) (tok_to_s h))
-  | [] ->
-    Error (Printf.sprintf "Expected %s but got end of string" (tok_to_s t))
+  | h :: _ -> Error (Printf.sprintf "Expected %s but got %s" (tok_to_s t) (tok_to_s h))
+  | [] -> Error (Printf.sprintf "Expected %s but got end of string" (tok_to_s t))
 ;;
 
 let rec parse str =
