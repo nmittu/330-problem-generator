@@ -85,7 +85,7 @@ let settings t =
       ; enabled = None
       ; value = t.depth
       ; update = (fun d -> Update_depth d)
-      ; extra = 2, 5
+      ; extra = 2, 10
       }
   ]
 ;;
