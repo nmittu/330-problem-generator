@@ -36,13 +36,13 @@ and generate_bool depth =
   then Var
   else (
     match Random.int 7 with
-    | 0 -> Eq (generate 1, generate 1)
-    | 1 -> Gt (generate 1, generate 1)
-    | 2 -> Lt (generate 1, generate 1)
+    | 0 -> Eq (generate (min (depth - 1) 1), generate (min (depth - 1) 1))
+    | 1 -> Gt (generate (min (depth - 1) 1), generate (min (depth - 1) 1))
+    | 2 -> Lt (generate (min (depth - 1) 1), generate (min (depth - 1) 1))
     | 3 -> Or (generate_bool 0, generate_bool 0)
     | 4 -> And (generate_bool 0, generate_bool 0)
     | 5 -> Not (generate_bool (depth - 1))
-    | _ -> If (generate_bool 0, generate_bool (depth - 1), generate_bool (depth - 1)))
+    | _ -> If (generate_bool 0, generate_bool 0, generate_bool 0))
 ;;
 
 let get_next () =
