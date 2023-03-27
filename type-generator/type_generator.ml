@@ -1,16 +1,10 @@
 open! Core
+open Type_intf
 module StringSet = Set.Make (String)
 module StringMap = Hashtbl.Make (String)
+module Parser = Parser
 
-type ocaml_type =
-  | Int
-  | Float
-  | String
-  | Bool
-  | Tuple of ocaml_type * ocaml_type
-  | List of ocaml_type
-  | Func of (ocaml_type * ocaml_type)
-  | Polymorphic of string
+type ocaml_type = Type_intf.ocaml_type
 
 type mode =
   [ `Non_polymorphic

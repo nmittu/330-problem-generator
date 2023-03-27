@@ -1,12 +1,6 @@
-type ocaml_type =
-  | Int
-  | Float
-  | String
-  | Bool
-  | Tuple of ocaml_type * ocaml_type
-  | List of ocaml_type
-  | Func of (ocaml_type * ocaml_type)
-  | Polymorphic of string
+module Parser = Parser
+
+type ocaml_type = Type_intf.ocaml_type
 
 type mode =
   [ `Non_polymorphic
@@ -20,5 +14,6 @@ type typ =
   ]
 [@@deriving sexp, compare]
 
+val normalize : ocaml_type -> ocaml_type
 val generate : mode:mode -> typ:typ -> int -> ocaml_type
 val to_string : ocaml_type -> string
