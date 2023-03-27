@@ -32,22 +32,32 @@ let next t = { t with expr = generate_expr t.depth }
 let problem t = t.expr
 let should_submit _ = String.is_suffix ~suffix:"\n"
 let type_regex = Str.regexp {|[a-zA-Z- ]* : \(.*\) = .*|}
+let remove_excess_whitespace = Str.regexp "[ \n]+"
 
 let submit t input =
+  let open Result.Let_syntax in
   let expected = execute (t.expr ^ ";;") in
-  let typ = execute (Printf.sprintf "type t = %s;;" input) in
+  let%bind expected =
+    let%bind expected = expected in
+    let expected = Str.global_replace remove_excess_whitespace " " expected in
+    if Str.string_match type_regex expected 0
+    then (
+      let typ =
+        Str.matched_group 1 expected
+        |> String.chop_prefix_if_exists ~prefix:"type t ="
+        |> String.strip
+      in
+      return (Type_generator.Parser.parse typ))
+    else Error ("Invalid problem, please let course staff know.\nerror: " ^ expected)
+  in
+  let typ = Type_generator.Parser.parse input >>| Type_generator.normalize in
   match expected, typ with
   | Error e, _ ->
     Error
       ("There is an issue with this problem, please let course staff know.\nerror: " ^ e)
   | _, Error e -> Error ("Invalid type: " ^ e)
   | Ok expected, Ok typ ->
-    if Str.string_match type_regex expected 0
-    then (
-      let expected = Str.matched_group 1 expected |> String.strip in
-      let typ = String.chop_prefix_if_exists typ ~prefix:"type t = " |> String.strip in
-      if String.(expected = typ) then Ok "Correct!" else Error "Incorrect type")
-    else Error ("Invalid problem, please let course staff know.\nerror: " ^ expected)
+    if Poly.(expected = typ) then Ok "Correct!" else Error "Incorrect type"
 ;;
 
 let on_tab _ _ = ()
