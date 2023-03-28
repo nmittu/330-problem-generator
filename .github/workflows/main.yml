@@ -26,7 +26,7 @@ jobs:
       - name: Setup dune
         uses: nmittu/setup-dune@v2
         with:
-          packages: "js_of_ocaml.5.0.1 js_of_ocaml-toplevel.5.0.1 js_of_ocaml-ppx incr_dom ocp-indent ocamlformat-lib"
+          packages: "js_of_ocaml.5.0.1 js_of_ocaml-toplevel.5.0.1 js_of_ocaml-ppx incr_dom ocp-indent ocamlformat-lib odoc"
           compiler: 5.0.0
       - name: build
         run: |
