@@ -1,6 +1,6 @@
 (alias
  (name default)
- (deps 
+ (deps
   bin/index.html
   bin/type_of_expr.html
   bin/type_of_expr.bc.js
