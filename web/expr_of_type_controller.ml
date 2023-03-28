@@ -30,6 +30,8 @@ let init () =
   }
 ;;
 
+(** Validates the settings for this controller and updates any values
+    if necesary. *)
 let validate_conf t =
   let poly_count = min t.poly_count t.params |> max 1 in
   let func_count = min t.func_count (t.params - 1) |> max 1 in

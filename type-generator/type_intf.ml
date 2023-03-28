@@ -1,3 +1,4 @@
+(** This represents the values of OCaml {i types}.*)
 type ocaml_type =
   | Int
   | Float

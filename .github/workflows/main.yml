@@ -31,13 +31,13 @@ jobs:
       - name: build
         run: |
           eval $(opam config env)
-          dune build bin/{index.html,type_of_expr.html,type_of_expr.bc.js,expr_of_type.html,expr_of_type.bc.js} --profile="release"
+          dune build @site --profile="release"
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Upload page
         uses: actions/upload-pages-artifact@v1
         with:
-          path: './_build/default/bin'
+          path: './_build/default/site'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
