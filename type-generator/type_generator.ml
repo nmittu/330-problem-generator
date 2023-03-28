@@ -3,6 +3,7 @@ open Type_intf
 module StringSet = Set.Make (String)
 module StringMap = Hashtbl.Make (String)
 module Parser = Parser
+module Type_intf = Type_intf
 
 type ocaml_type = Type_intf.ocaml_type
 

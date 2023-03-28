@@ -27,4 +27,4 @@ jobs:
       - name: Build
         run: |
           eval $(opam config env)
-          dune build bin/{index.html,type_of_expr.html,type_of_expr.bc.js,expr_of_type.html,expr_of_type.bc.js}
+          dune build

@@ -1,0 +1,31 @@
+(alias
+ (name default)
+ (deps
+  bin/index.html
+  bin/type_of_expr.html
+  bin/type_of_expr.bc.js
+  bin/expr_of_type.html
+  bin/expr_of_type.bc.js))
+
+(alias
+ (name site))
+
+(subdir
+ site
+ (rule
+  (alias site)
+  (deps
+   (alias_rec %{project_root}/default))
+  (action
+   (bash "cp ../bin/*.{js,html} .")))
+ (subdir
+  docs
+  (rule
+   (alias site)
+   (deps
+    (alias_rec %{project_root}/doc-private))
+   (action
+    (pipe-outputs
+     (bash "cp -r ../../_doc/_html/* .")
+     (bash
+      "find . -type d -name \"*@*\" -prune -exec sh -c 'mv \"$1\" \"${1%%@*}\"' sh {} \\;"))))))
