@@ -129,7 +129,7 @@ let to_string e =
      | Tuple (e1, e2) -> Printf.sprintf "(%s, %s)" (to_string_h e1) (to_string_h e2)
      | App (e, es) ->
        let args = List.map ~f:to_string_h es |> String.concat ~sep:" " in
-       Printf.sprintf "%s %s" (to_string_h e) args
+       Printf.sprintf "(%s %s)" (to_string_h e) args
      | Eq (e1, e2) -> Printf.sprintf "(%s = %s)" (to_string_h e1) (to_string_h e2)
      | Gt (e1, e2) -> Printf.sprintf "(%s > %s)" (to_string_h e1) (to_string_h e2)
      | Lt (e1, e2) -> Printf.sprintf "(%s < %s)" (to_string_h e1) (to_string_h e2)
