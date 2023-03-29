@@ -1,5 +1,6 @@
 (library
  (name expr_generator)
+ (package 330_problem_generator)
  (libraries core ocamlformat-lib)
  (preprocess
   (pps js_of_ocaml-ppx ppx_jane)))

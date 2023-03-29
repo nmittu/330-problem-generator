@@ -1,5 +1,6 @@
 (library
  (name problems_web)
+ (public_name 330_problem_generator)
  (libraries
   core
   incr_dom

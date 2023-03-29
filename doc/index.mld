@@ -1,0 +1,140 @@
+{0 CMSC 330 Practice Problem Generatron}
+
+API Documentation: {!modules: Problems_web Expr_generator Type_generator}
+
+{1 Repository Structure}
+
+The repository is currently laid out into a number of different libraries.
+- {!Problems_web}
+- Backend generator modules such as {!Expr_generator} and {!Type_generator}
+- A bin library
+
+In order to create a new problem type, you will need to create new modules in
+all of these libraries.
+
+{2 Generator libraries}
+Each problem type should have a library that is used to actally generate the
+problems. These libraries do not need to satisfy any specific module type
+because they will only be used the internals of the problem types 
+{!Problems_web.Controller_intf.S} implementation, however here are a few examples
+of generator libraries:
+- {!Expr_generator}
+- {!Type_generator}
+
+{2 Problems_web library}
+The {!Problems_web} library contains all of the {!Problems_web.Controller_intf.S} modules for different problem types as
+well as the {!Problems_web.App.Make} functor that is used to create [incr_dom] apps from a
+controller. If you need to update the actual [Vdom] nodes that are generated in the UI, this is
+where you should go to.
+
+{3 Controllers}
+Controllers are modules that satisfy the {!Problems_web.Controller_intf.S} module type. These
+modules control how the UI should behave for a particular problem type without us having
+to worry about how the [incr_dom] implementation is actually working.
+
+A {!Problems_web.Controller_intf.S} implementation should generally look something like this:
+{[
+open Controller_intf
+
+type t =
+  { problem : string
+    (* additional configuration options *)
+  }
+
+type settings_action =
+  | Update_setting1
+  | Update_setting2
+
+let init () =
+  { problem = Generator.new ()
+    (* Set initial settings *)
+  }
+
+let next t = { t with problem = Generator.new () }
+let problem t = t.problem
+let should_submit _ s = String.is_suffix ~suffix:"\n" s
+let submit t input =
+  if check_input t then
+    Ok "Correct"
+  else
+    Error "Error message"
+
+(* This could be used to auto indent code in text area *)
+let on_tab _ _ = ()
+
+let settings t =
+  [ Group
+       { name = "Setting"
+       ; settings = [(* ... *)]
+       }
+  ]
+
+let update_settings t action =
+  match action with
+  (* next makes sure we generate a new problem with the new settings *)
+  | Update_setting1 -> next (update1 t)
+  | Update_setting2 -> next (update2 t)
+]}
+
+{3 App.Make}
+Once we have created a Controller for our problem type we are ready to
+create the [incr_dom] app. To create the [incr_dom] app, first we will
+need to create the template html file that should look like this:
+
+{@html[
+<html>
+  <head>
+    <script type='text/javascript' src='app_name.bc.js'></script>
+  </head>
+  <body style="font-family:monospace">
+    <div id='app'>
+    </div>
+  </body>
+</html>
+]}
+
+The app will be bound to the [app] div in this example. We will also need
+to create an ocaml program that will initialize our app. This is where
+[app_name.bc.js] comes from in the example above. We can create this in a
+file called [app_name.ml]:
+
+{[
+open! Incr_dom
+open! Js_of_ocaml
+module App = Problems_web.App.Make (Problems_web.Controller_name)
+
+let () =
+  Start_app.start
+    (module App)
+    ~bind_to_element_with_id:"app"
+    ~initial_model:App.initial_model
+;;
+]}
+
+Both of these files will go in the [bin] library
+
+{0 Dune Build }
+All the html and js files that compose the website are targets under
+the bin directory. For example if we have [problem_type.html] and 
+[problem_type.ml], we can build this problem type with the command
+[dune build bin/{problem_type.html,problem_type.bc.js}]
+
+Note: notice the [.bc.js] extension, this and the fact that the mode is
+defined as [(mode js)] in the dune file, tells dune that this executable
+should be compiled with [Js_of_ocaml]
+
+{1 Default alias}
+We override the [default] alias to build all static resources for the site.
+This allows us to build the entire site using the command [dune build].
+If you create a new problem type, you should add the html, js, and any other
+static dependencies as dependencies to the deafault dune alias.
+
+{1 Site alias}
+We also have a [site] alias that is used to build all static resources
+and place them in the correct directory structure to deploy the site.
+The [site] alias depends on the [default] and [doc-private] targets and
+copy all of the html, js and documentation files to the [_build/default/site]
+directory.
+
+This alias is used by github actions to build and deploy the site to
+github pages.  
