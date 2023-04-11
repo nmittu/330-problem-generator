@@ -56,6 +56,9 @@ module type S = sig
   (** Get the text of the current problem. *)
   val problem : t -> string
 
+  (** Description to show above the problem. *)
+  val description : t -> string
+
   (** Checks whether the problem should submit given the current text in the
       input. This function will often check for a newline character to see if
       the user has clicked the enter button. If {!should_submit} returns true,
