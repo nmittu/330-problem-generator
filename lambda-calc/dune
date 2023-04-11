@@ -1,0 +1,6 @@
+(library
+ (name lambda_calc)
+ (package 330_problem_generator)
+ (libraries core str)
+ (preprocess
+  (pps js_of_ocaml-ppx ppx_jane)))
