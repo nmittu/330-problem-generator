@@ -5,7 +5,9 @@
   bin/type_of_expr.html
   bin/type_of_expr.bc.js
   bin/expr_of_type.html
-  bin/expr_of_type.bc.js))
+  bin/expr_of_type.bc.js
+  bin/beta_reduction.html
+  bin/beta_reduction.bc.js))
 
 (alias
  (name site))

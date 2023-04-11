@@ -87,7 +87,7 @@ let tokenize str =
     then (
       let match_len = Str.matched_string str |> String.length in
       tokenize (pos + match_len))
-    else Error "Could not tolkenize type"
+    else Error "Could not tokenize type"
   in
   tokenize 0
 ;;
