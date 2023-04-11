@@ -32,6 +32,12 @@ let init () =
 
 let next t = { t with expr = generate_expr t.mode t.depth }
 let problem t = t.expr
+
+let description _ =
+  "Enter the type of the following OCaml expression. Press enter after entering the type \
+   to get feedback."
+;;
+
 let should_submit _ = String.is_suffix ~suffix:"\n"
 let type_regex = Str.regexp {|[a-zA-Z- ]* : \(.*\) = .*|}
 let remove_excess_whitespace = Str.regexp "[ \n]+"

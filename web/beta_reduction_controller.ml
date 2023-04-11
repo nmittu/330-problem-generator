@@ -13,6 +13,13 @@ type settings_action = Update_depth of int [@@deriving sexp]
 let init () = { expr = Generator.generate 3; depth = 3 }
 let next t = { t with expr = Generator.generate t.depth }
 let problem t = to_string t.expr
+
+let description _ =
+  "Enter an equivalent lambda expression in beta-normal form. You may use either λ or L \
+   to represent the lambda character. Press enter after entering an answer to get \
+   feedback."
+;;
+
 let should_submit _ = String.is_suffix ~suffix:"\n"
 
 let submit t input =

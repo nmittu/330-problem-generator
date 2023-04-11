@@ -57,6 +57,12 @@ let next t =
 ;;
 
 let problem t = t.typ
+
+let description _ =
+  "Enter an OCaml function that has the following type. Make sure to end your expression \
+   with ;; and then press enter like in UTop. You may use tab to indent your code."
+;;
+
 let should_submit _ = String.is_suffix ~suffix:";;\n"
 let type_regex = Str.regexp {|[a-zA-Z- ]* : \(.*\) = .*|}
 let remove_excess_whitespace = Str.regexp "[ \n]+"

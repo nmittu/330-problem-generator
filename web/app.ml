@@ -187,7 +187,10 @@ module Make (Controller : Controller_intf.S) = struct
         ~attr:(Attr.many_without_merge [ Attr.on_click (fun _ -> inject Action.Next) ])
         [ Node.text "Next Problem" ]
     in
-    let%map problem_node =
+    let%map description_node =
+      let%map desc = m >>| Model.controller >>| Controller.description in
+      Node.pre [ Node.text desc ]
+    and problem_node =
       let%map problem = m >>| Model.controller >>| Controller.problem in
       Node.pre [ Node.text problem ]
     and code_input =
@@ -243,7 +246,15 @@ module Make (Controller : Controller_intf.S) = struct
       let%map settings = m >>| Model.controller >>| Controller.settings in
       build_settings settings inject
     in
-    Node.body [ problem_node; code_input; res_node; error_node; next_button; configs ]
+    Node.body
+      [ description_node
+      ; problem_node
+      ; code_input
+      ; res_node
+      ; error_node
+      ; next_button
+      ; configs
+      ]
   ;;
 
   let on_display ~old_model model _ ~schedule_action:_ =
