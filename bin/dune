@@ -1,5 +1,5 @@
 (executables
- (names expr_of_type type_of_expr)
+ (names expr_of_type type_of_expr beta_reduction)
  (libraries
   type_generator
   core
