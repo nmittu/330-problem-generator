@@ -6,6 +6,7 @@
   incr_dom
   type_generator
   expr_generator
+  lambda_calc
   str
   js_of_ocaml-compiler
   js_of_ocaml-toplevel
