@@ -1,7 +1,7 @@
 open! Core
 open Type
 
-let default_sigma = "abcd"
+let default_sigma = "abc"
 
 let rand_char str =
   let i = Random.int (String.length str) in
